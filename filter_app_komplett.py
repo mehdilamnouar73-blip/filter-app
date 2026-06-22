@@ -104,7 +104,7 @@ st.markdown(f"""
     </td>
     <td style="width:200px; text-align:right;vertical-align:middle;white-space:nowrap;padding-left:10px;">
       <span style="color:#A8C4E0;font-size:0.78rem;line-height:1.6;">
-        Prof. Dr. Wilczek<br>
+        Dr.-Ing. Wilczek<br>
         Prof. Dr. Keune
       </span>
     </td>
@@ -314,6 +314,7 @@ st.markdown(f"""
     .block-container p, .block-container h1, .block-container h2, 
     .block-container h3, .block-container h4, 
     .block-container label {{ color: {TXT} !important; }}
+    div[style*="background:{BLUE}"] p {{ color: #FFFFFF !important; }}
 </style>
 """, unsafe_allow_html=True)
 
