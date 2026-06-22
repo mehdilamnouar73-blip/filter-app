@@ -91,7 +91,7 @@ st.markdown(f"""
 
 # ── HEADER ────────────────────────────────────────────────────────
 st.markdown(f"""
-<div style="background:{BLUE}; padding:10px 20px 10px 20px;
+<div class="thga-header" style="background:{BLUE}; padding:10px 20px 10px 20px;
      margin-bottom:1.2rem; border-bottom:4px solid {RED};">
   <table width="100%" style="table-layout:fixed;border-collapse:collapse;"><tr>
     <td style="width:110px; vertical-align:middle; padding-right:16px;">
@@ -314,7 +314,7 @@ st.markdown(f"""
     .block-container p, .block-container h1, .block-container h2, 
     .block-container h3, .block-container h4, 
     .block-container label {{ color: {TXT} !important; }}
-    div[style*="background:{BLUE}"] p {{ color: #FFFFFF !important; }}
+    .thga-header p, .thga-header span {{ color: #FFFFFF !important; }}
 </style>
 """, unsafe_allow_html=True)
 
