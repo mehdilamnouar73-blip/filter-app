@@ -1,10 +1,9 @@
 """
 Aktive Filter Analyse – Bachelorarbeit THGA
 Vergleich aktiver Filtertopologien für FDM-Systeme
-unter Berücksichtigung realer Operationsverstärker-Eigenschaften
-und Bauteiltoleranzen (Monte Carlo)
+unter Berücksichtigung realer Operationsverstärker.
 
-Betreuer: Prof. Dr. Sebastian Wilczek · Prof. Dr. Keune
+Betreuer: Dr.Ing. Sebastian Wilczek · Prof. Dr. Keune
 """
 
 import numpy as np
