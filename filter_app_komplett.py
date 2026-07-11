@@ -41,10 +41,19 @@ st.markdown(f"""
        intakt. Nur die Farbe wird angepasst, damit es nicht grau absticht. */
     header[data-testid="stHeader"] {{
         background: {BLUE} !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-bottom: none !important;
+        backdrop-filter: none !important;
+    }}
+    header[data-testid="stHeader"]::before,
+    header[data-testid="stHeader"]::after {{
+        display: none !important;
     }}
     header[data-testid="stHeader"] * {{
         color: white !important;
     }}
+    .block-container {{ padding-top: 0.5rem !important; }}
     section[data-testid="stSidebar"][aria-expanded="true"] {{
         min-width: 300px !important;
         max-width: 300px !important;
