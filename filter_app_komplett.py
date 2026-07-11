@@ -33,25 +33,22 @@ st.markdown(f"""
     [data-testid="stAppViewContainer"] {{ background-color: #F5F7FA !important; }}
     [data-testid="stMainBlockContainer"] {{ background-color: #F5F7FA !important; }}
     .block-container {{ padding-top: 0rem; background-color: #F5F7FA !important; }}
-    header[data-testid="stHeader"] {{ display: none !important; }}
-    #root > div:first-child {{ margin-top: 0 !important; }}
-    .stApp > header {{ display: none !important; }}
-    section[data-testid="stSidebar"] {{
+    /* Bekanntes Streamlit-Problem (siehe streamlit/streamlit#11449):
+       Header/Toolbar/collapsedControl per CSS zu verstecken bricht den
+       nativen Kollaps-Button je nach Streamlit-Version. Deshalb wird hier
+       NICHTS versteckt (kein display/visibility auf Header, Toolbar oder
+       Button) -> der native Ein-/Ausklapp-Mechanismus bleibt zu 100 %
+       intakt. Nur die Farbe wird angepasst, damit es nicht grau absticht. */
+    header[data-testid="stHeader"] {{
+        background: {BLUE} !important;
+    }}
+    header[data-testid="stHeader"] * {{
+        color: white !important;
+    }}
+    section[data-testid="stSidebar"][aria-expanded="true"] {{
         min-width: 300px !important;
         max-width: 300px !important;
-        transform: none !important;
-        visibility: visible !important;
     }}
-    section[data-testid="stSidebar"][aria-expanded="false"] {{
-        min-width: 300px !important;
-        max-width: 300px !important;
-        margin-left: 0 !important;
-        transform: none !important;
-        visibility: visible !important;
-    }}
-    /* FINAL: Sidebar-Kollaps-Funktion bewusst deaktiviert. Sidebar ist
-       dauerhaft sichtbar/fixiert -> stabil, sauber, kein weiteres Risiko
-       vor der Abgabe. */
 
     div[data-testid="stSidebar"] {{ background-color: {BLUE}; }}
     div[data-testid="stSidebar"] * {{ color: white !important; font-size: 1.0rem !important; }}
