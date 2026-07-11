@@ -40,11 +40,14 @@ st.markdown(f"""
         height: 2.5rem !important;
         min-height: 2.5rem !important;
         background: transparent !important;
+        overflow: visible !important;
     }}
     #root > div:first-child {{ margin-top: 0 !important; }}
 
     [data-testid="collapsedControl"] {{
         visibility: visible !important;
+        display: flex !important;
+        opacity: 1 !important;
     }}
 
     /* Nur die Breite im AUSGEKLAPPTEN Zustand festlegen.
