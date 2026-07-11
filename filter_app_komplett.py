@@ -33,12 +33,25 @@ st.markdown(f"""
     [data-testid="stAppViewContainer"] {{ background-color: #F5F7FA !important; }}
     [data-testid="stMainBlockContainer"] {{ background-color: #F5F7FA !important; }}
     .block-container {{ padding-top: 0rem; background-color: #F5F7FA !important; }}
-    header[data-testid="stHeader"] {{ display: none !important; }}
+    /* Header optisch ausblenden, OHNE ihn aus dem Renderbaum zu nehmen,
+       damit der collapsedControl-Pfeil (Kind-Element) sichtbar bleiben kann */
+    header[data-testid="stHeader"] {{
+        visibility: hidden !important;
+        height: 2.5rem !important;
+        min-height: 2.5rem !important;
+        background: transparent !important;
+    }}
     #root > div:first-child {{ margin-top: 0 !important; }}
-    .stApp > header {{ display: none !important; }}
 
-    /* ── SIDEBAR: kollabierbar (FIX v2) ───────────────────────── */
-    [data-testid="collapsedControl"] {{ display: block !important; }}
+    /* ── SIDEBAR: kollabierbar (FIX v3) ───────────────────────── */
+    [data-testid="collapsedControl"] {{
+        visibility: visible !important;
+        display: flex !important;
+        position: fixed !important;
+        top: 0.6rem !important;
+        left: 0.6rem !important;
+        z-index: 999999 !important;
+    }}
     section[data-testid="stSidebar"][aria-expanded="true"] {{
         min-width: 300px !important;
         max-width: 300px !important;
