@@ -33,21 +33,11 @@ st.markdown(f"""
     [data-testid="stAppViewContainer"] {{ background-color: #F5F7FA !important; }}
     [data-testid="stMainBlockContainer"] {{ background-color: #F5F7FA !important; }}
     .block-container {{ padding-top: 0rem; background-color: #F5F7FA !important; }}
-    /* STRATEGIEWECHSEL: Der Header selbst und collapsedControl werden NICHT
-       mehr per CSS angefasst -> nativer Streamlit-Kollaps-Mechanismus bleibt
-       komplett unberuehrt und funktioniert garantiert wie vorgesehen.
-       Stattdessen werden nur einzelne Deko-Elemente IM Header gezielt
-       ausgeblendet (ueber eigene, stabile data-testid Selektoren). */
-    header[data-testid="stHeader"] {{
-        background: #F5F7FA !important;
-    }}
-    [data-testid="stToolbar"] {{ visibility: hidden !important; }}
-    [data-testid="stStatusWidget"] {{ visibility: hidden !important; }}
-    [data-testid="stDecoration"] {{ display: none !important; }}
-
-    /* Nur die Breite im AUSGEKLAPPTEN Zustand festlegen.
-       Fuer den eingeklappten Zustand KEINE eigenen Regeln -> Streamlit
-       uebernimmt Kollaps + Repositionierung des Hauptbereichs selbst. */
+    /* Kein CSS mehr fuer Header/Toolbar/collapsedControl -> Streamlit-Standard
+       wird an dieser Stelle komplett unveraendert angezeigt. Das ist bewusst
+       so belassen, damit der native Ein-/Ausklapp-Button garantiert und
+       zuverlaessig funktioniert (keine versteckten Elternelemente mehr,
+       die ihn mitverstecken koennten). */
     section[data-testid="stSidebar"][aria-expanded="true"] {{
         min-width: 300px !important;
         max-width: 300px !important;
