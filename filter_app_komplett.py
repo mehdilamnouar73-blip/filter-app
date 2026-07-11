@@ -33,31 +33,25 @@ st.markdown(f"""
     [data-testid="stAppViewContainer"] {{ background-color: #F5F7FA !important; }}
     [data-testid="stMainBlockContainer"] {{ background-color: #F5F7FA !important; }}
     .block-container {{ padding-top: 0rem; background-color: #F5F7FA !important; }}
-    /* Header optisch ausblenden, OHNE ihn aus dem Renderbaum zu nehmen,
-       damit der collapsedControl-Pfeil (Kind-Element) sichtbar bleiben kann */
-    header[data-testid="stHeader"] {{
-        visibility: hidden !important;
-        height: 2.5rem !important;
-        min-height: 2.5rem !important;
-        background: transparent !important;
-    }}
+    header[data-testid="stHeader"] {{ display: none !important; }}
     #root > div:first-child {{ margin-top: 0 !important; }}
-
-    /* ── SIDEBAR: kollabierbar (FIX v3) ───────────────────────── */
-    [data-testid="collapsedControl"] {{
-        visibility: visible !important;
-        display: flex !important;
-        position: fixed !important;
-        top: 0.6rem !important;
-        left: 0.6rem !important;
-        z-index: 999999 !important;
-    }}
-    section[data-testid="stSidebar"][aria-expanded="true"] {{
+    .stApp > header {{ display: none !important; }}
+    section[data-testid="stSidebar"] {{
         min-width: 300px !important;
         max-width: 300px !important;
+        transform: none !important;
+        visibility: visible !important;
     }}
-    /* Kein Override für aria-expanded="false" -> Streamlit regelt
-       Kollaps + Repositionierung des Hauptbereichs selbst korrekt */
+    section[data-testid="stSidebar"][aria-expanded="false"] {{
+        min-width: 300px !important;
+        max-width: 300px !important;
+        margin-left: 0 !important;
+        transform: none !important;
+        visibility: visible !important;
+    }}
+    /* Hinweis: Sidebar-Kollaps-Funktion bewusst NICHT aktiv (Stand: Rollback
+       fuer Screenshot-Deadline). Sidebar ist IMMER sichtbar/fixiert,
+       unabhaengig vom lokal gespeicherten Kollaps-Zustand des Browsers. */
 
     div[data-testid="stSidebar"] {{ background-color: {BLUE}; }}
     div[data-testid="stSidebar"] * {{ color: white !important; font-size: 1.0rem !important; }}
