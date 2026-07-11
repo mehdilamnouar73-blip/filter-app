@@ -36,17 +36,17 @@ st.markdown(f"""
     header[data-testid="stHeader"] {{ display: none !important; }}
     #root > div:first-child {{ margin-top: 0 !important; }}
     .stApp > header {{ display: none !important; }}
+
+    /* ── SIDEBAR: kollabierbar (FIX) ──────────────────────────── */
     [data-testid="collapsedControl"] {{ display: block !important; }}
-    section[data-testid="stSidebar"] {{ 
-        min-width: 300px !important; 
-        max-width: 300px !important;
-        transform: none !important;
-        visibility: visible !important;
-    }}
-    section[data-testid="stSidebar"][aria-expanded="false"] {{
+    section[data-testid="stSidebar"][aria-expanded="true"] {{
         min-width: 300px !important;
         max-width: 300px !important;
-        margin-left: 0 !important;
+    }}
+    section[data-testid="stSidebar"][aria-expanded="false"] {{
+        min-width: 0px !important;
+        max-width: 0px !important;
+        margin-left: -300px !important;
     }}
 
     div[data-testid="stSidebar"] {{ background-color: {BLUE}; }}
@@ -1070,8 +1070,6 @@ with tabs[8]:
     Eine maximale Abweichung nahe Null bestätigt die Korrektheit der Simulation.
     </div>""", unsafe_allow_html=True)
 
-    import pandas as pd
-
     # ── Kreuzvalidierung: eigene H(jω) vs. scipy.freqs ────────────
     st.markdown('<p class="section-title">1. Frequenzgang-Validierung: H(jω) Kreuzvergleich</p>',
                 unsafe_allow_html=True)
@@ -1142,7 +1140,7 @@ with tabs[8]:
             f0e, Qe = apply_gbw(f0e, Qe, GBW, GBW_FAKTOREN[name])
         w0 = 2 * np.pi * f0e
         sigma_th = -w0 / (2 * Qe)
-        wd_th    =  w0 * np.sqrt(1 - 1/(4*Qe**2))
+        wd_th    =  w0 * np.sqrt(max(0, 1 - 1/(4*Qe**2)))
 
         for p in poles:
             abw_re = abs(p.real - sigma_th)
@@ -1206,7 +1204,6 @@ with tabs[8]:
     - Impuls- und Sprungantworten über lsim() berechnet – kein externes Tool
     - ✅ Simulation vollständig in Python validiert
     """)
-
 
 # ════════════════════════════════════════════════════════════════
 # TAB 10 – GRUPPENLAUFZEIT
@@ -1310,273 +1307,6 @@ with tabs[9]:
     for name in NAMES:
         tau_q = []
         for q in q_vec_gl:
-            tf_q = make_filter(name, f0_1, q, GBW=GBW)
-            _, H = signal.freqs(tf_q.num, tf_q.den,
-                                worN=2*np.pi*np.array([f0_1]))
-            phase_q = np.angle(H[0])
-            # Numerische Ableitung an f0
-            dw = 2 * np.pi * 0.1
-            _, H2 = signal.freqs(tf_q.num, tf_q.den,
-                                 worN=2*np.pi*np.array([f0_1+0.1]))
-            dphi = np.angle(H2[0]) - phase_q
-            tau_val = -dphi / dw * 1000
-            tau_q.append(abs(tau_val))
-
-        fig_gl2.add_trace(go.Scatter(
-            x=q_vec_gl, y=tau_q,
-            name=name,
-            line=dict(color=COL[name], width=2.5, dash=LS[name])))
-
-    fig_gl2.add_vline(x=Q, line_dash="dot", line_color="orange",
-                      line_width=2, opacity=0.9,
-                      annotation_text=f"Q={Q}",
-                      annotation_position="top right",
-                      annotation_font_size=11)
-    fig_gl2.add_hline(y=2.0, line_dash="dash", line_color=RED,
-                      opacity=0.6,
-                      annotation_text="Grenzwert: 2 ms",
-                      annotation_position="top right",
-                      annotation_font_size=11,
-                      annotation_font_color=RED)
-    fig_gl2.update_xaxes(title_text="Gütefaktor Q", gridcolor="#EEEEEE",
-                         tickfont=dict(size=13))
-    fig_gl2.update_yaxes(title_text="Gruppenlaufzeit bei f₀ [ms]",
-                         gridcolor="#EEEEEE", tickfont=dict(size=13))
-    fig_gl2.update_layout(height=380,
-        title=dict(
-            text=f"Gruppenlaufzeit bei f₀ vs. Gütefaktor Q | f₀={f0_1} Hz, {modus}",
-            font=dict(size=15, color=BLUE),
-            x=0.5, xanchor="center"),
-        **LAYOUT)
-    st.plotly_chart(fig_gl2, width="stretch", key="chart_15")
-
-    st.markdown(f"""
-    **Erkenntnisse:**
-    - Alle drei Filter haben bei gleichem f₀ und Q **identische Gruppenlaufzeit** beim idealen Modell
-    - Gruppenlaufzeit steigt mit dem Gütefaktor → Trade-off zwischen Selektivität und Laufzeit
-    - Bei Q={Q}: τ(f₀) = {tau_bei_f0["Sallen-Key"]:.3f} ms
-    - Simulationsgrenzwert 2 ms eingehalten (konservative Eigenannahme; strenger Wert für reale Systeme: 0,25 ms bei Δf=2 kHz)
-    - Gruppenlaufzeit ist kein Unterscheidungskriterium zwischen den Topologien – aber alle drei erfüllen die Systemanforderung
-    """)
-
-
-
-
-# ════════════════════════════════════════════════════════════════
-# TAB 9 – VALIDIERUNG
-# ════════════════════════════════════════════════════════════════
-with tabs[8]:
-    st.markdown("#### Validierung der Simulation – Kreuzvergleich in Python")
-    st.markdown("""
-    <div class="info-box">
-    <b>Methode:</b> Alle eigenen Berechnungen werden gegen scipy-Referenzfunktionen geprüft.
-    freqs() · tf2zpk() · impulse() · step() – kein externes Tool.
-    Eine maximale Abweichung nahe Null bestätigt die Korrektheit.
-    </div>""", unsafe_allow_html=True)
-
-    import pandas as pd
-
-    # ── 1. Frequenzgang-Validierung ───────────────────────────────
-    st.markdown('<p class="section-title">1. Kreuzvalidierung: freqs() vs. bode()</p>',
-                unsafe_allow_html=True)
-
-    val_results = []
-    fig_val = go.Figure()
-
-    for name, tf in filters.items():
-        w_vec = 2 * np.pi * f_vec
-        _, H1 = signal.freqs(tf.num, tf.den, worN=w_vec)
-        w_bode, mag_bode, _ = signal.bode(signal.lti(tf.num, tf.den), w=w_vec)
-        H2_mag = 10 ** (mag_bode / 20)
-        abw    = np.max(np.abs(np.abs(H1) - H2_mag))
-
-        val_results.append({
-            "Topologie":           name,
-            "Max. Abweichung |H|": f"{abw:.2e}",
-            "Status":              "✅ Validiert" if abw < 1e-6 else "⚠️ Prüfen",
-        })
-
-        fig_val.add_trace(go.Scatter(x=f_vec,
-            y=20*np.log10(np.abs(H1)+1e-12), name=f"{name} (freqs)",
-            line=dict(color=COL[name], width=2.5, dash=LS[name])))
-        fig_val.add_trace(go.Scatter(x=f_vec,
-            y=mag_bode, name=f"{name} (bode)",
-            line=dict(color=COL[name], width=1.5, dash="dot"), opacity=0.5))
-
-    fig_val.add_vline(x=f0_1, line_dash="dot", line_color="orange",
-                      line_width=1.5, opacity=0.8)
-    fig_val.add_vline(x=f0_2, line_dash="dot", line_color="gray",
-                      line_width=1.2, opacity=0.6)
-    fig_val.update_xaxes(type="log", title_text="Frequenz [Hz]",
-                         gridcolor="#EEEEEE")
-    fig_val.update_yaxes(title_text="Amplitude [dB]", gridcolor="#EEEEEE")
-    fig_val.update_layout(height=380,
-        title=dict(text=f"Kreuzvalidierung freqs() vs. bode() | f₀={f0_1} Hz, Q={Q}",
-                   font=dict(size=15, color=BLUE)), **LAYOUT)
-    st.plotly_chart(fig_val, width="stretch", key="chart_16")
-
-    st.markdown('<p class="section-title">Ergebnis</p>', unsafe_allow_html=True)
-    st.dataframe(pd.DataFrame(val_results),
-                 use_container_width=True, hide_index=True)
-
-    # ── 2. Pol-Nullstellen: tf2zpk ────────────────────────────────
-    st.markdown('<p class="section-title">2. Pol-Nullstellen-Validierung: tf2zpk()</p>',
-                unsafe_allow_html=True)
-
-    pz_results = []
-    for name, tf in filters.items():
-        zeros, poles, gain = signal.tf2zpk(tf.num, tf.den)
-        f0e, Qe = f0_1, Q
-        if use_gbw and GBW:
-            f0e, Qe = apply_gbw(f0e, Qe, GBW, GBW_FAKTOREN[name])
-        w0       = 2 * np.pi * f0e
-        sigma_th = -w0 / (2 * Qe)
-        wd_th    =  w0 * np.sqrt(max(0, 1 - 1/(4*Qe**2)))
-
-        for p in poles:
-            pz_results.append({
-                "Topologie":    name,
-                "Re tf2zpk":   f"{p.real:.2f}",
-                "Im tf2zpk":   f"{p.imag:.2f}",
-                "Re theor.":   f"{sigma_th:.2f}",
-                "Im theor.":   f"{wd_th:.2f}",
-                "Δ Re":        f"{abs(p.real - sigma_th):.2e}",
-                "Δ Im":        f"{abs(abs(p.imag) - wd_th):.2e}",
-                "Stabilität":  "✅ Stabil" if p.real < 0 else "❌ Instabil",
-            })
-
-    st.dataframe(pd.DataFrame(pz_results),
-                 use_container_width=True, hide_index=True)
-
-    # ── 3. Zeitbereich: lsim ─────────────────────────────────────
-    st.markdown('<p class="section-title">3. Impuls- und Sprungantwort: lsim()</p>',
-                unsafe_allow_html=True)
-
-    t_val = np.linspace(0, 0.02, 2000)
-    fig_imp = make_subplots(rows=1, cols=2,
-        subplot_titles=("Impulsantwort", "Sprungantwort"),
-        horizontal_spacing=0.12)
-
-    for name, tf in filters.items():
-        sys = signal.lti(tf.num, tf.den)
-        t_i, y_i = signal.impulse(sys, T=t_val)
-        t_s, y_s = signal.step(sys, T=t_val)
-        fig_imp.add_trace(go.Scatter(x=t_i*1000, y=y_i, name=name,
-            line=dict(color=COL[name], width=2.5, dash=LS[name])),
-            row=1, col=1)
-        fig_imp.add_trace(go.Scatter(x=t_s*1000, y=y_s, name=name,
-            line=dict(color=COL[name], width=2.5, dash=LS[name]),
-            showlegend=False), row=1, col=2)
-
-    fig_imp.update_xaxes(title_text="Zeit [ms]", gridcolor="#EEEEEE")
-    fig_imp.update_yaxes(title_text="Amplitude", gridcolor="#EEEEEE",
-                         row=1, col=1)
-    fig_imp.update_yaxes(title_text="Amplitude", gridcolor="#EEEEEE",
-                         row=1, col=2)
-    fig_imp.update_layout(height=380,
-        title=dict(text=f"Impuls- und Sprungantwort mit lsim() | f₀={f0_1} Hz, Q={Q}",
-                   font=dict(size=15, color=BLUE)), **LAYOUT)
-    st.plotly_chart(fig_imp, width="stretch", key="chart_17")
-
-    st.markdown("""
-    **Ergebnis der Validierung:**
-    - ✅ Frequenzgänge: freqs() und bode() stimmen überein
-    - ✅ Pol-Nullstellen: tf2zpk() stimmt mit theoretischen Werten überein
-    - ✅ Zeitbereich: Impuls- und Sprungantwort mit lsim() berechnet
-    - ✅ Simulation vollständig in Python validiert – kein externes Tool
-    """)
-
-
-# ════════════════════════════════════════════════════════════════
-# TAB 10 – GRUPPENLAUFZEIT
-# ════════════════════════════════════════════════════════════════
-with tabs[9]:
-    st.markdown("#### Gruppenlaufzeit τ(ω) = −dφ/dω")
-    st.markdown("""
-    <div class="info-box">
-    <b>Relevanz:</b> Konstante Gruppenlaufzeit bedeutet alle Frequenzanteile werden
-    gleich verzögert → keine Signalverzerrung. Für FDM-Systeme ist das entscheidend.<br>
-    <b>Simulationsgrenzwert: 2 ms</b> (konservative Eigenannahme;
-    Faustregel realer Systeme: τ ≤ 1/(2·Δf) = 0,25 ms bei Δf=2 kHz).
-    </div>""", unsafe_allow_html=True)
-
-    # ── Hauptdiagramm ─────────────────────────────────────────────
-    fig_gl = go.Figure()
-    tau_f0_vals = {}
-    tau_schwank = {}
-
-    for name, tf in filters.items():
-        _, H   = signal.freqs(tf.num, tf.den, worN=2*np.pi*f_vec)
-        phase  = np.unwrap(np.angle(H))
-        w      = 2 * np.pi * f_vec
-        tau    = -np.gradient(phase, w) * 1000  # ms
-
-        idx_f0 = np.argmin(np.abs(f_vec - f0_1))
-        tau_f0_vals[name] = tau[idx_f0]
-
-        mask = (f_vec >= f0_1/2) & (f_vec <= f0_1*2)
-        tau_schwank[name] = np.max(tau[mask]) - np.min(tau[mask])
-
-        fig_gl.add_trace(go.Scatter(
-            x=f_vec, y=tau, name=name,
-            line=dict(color=COL[name], width=2.8, dash=LS[name])))
-
-    fig_gl.add_vline(x=f0_1, line_dash="dot", line_color="orange",
-                     line_width=2, opacity=0.9,
-                     annotation_text=f"f₀={f0_1} Hz",
-                     annotation_position="top right",
-                     annotation_font_size=11)
-    fig_gl.add_vline(x=f0_2, line_dash="dot", line_color="gray",
-                     line_width=1.5, opacity=0.6)
-    fig_gl.add_hline(y=2.0, line_dash="dash", line_color=RED,
-                     line_width=2, opacity=0.7,
-                     annotation_text="Grenzwert: 2 ms",
-                     annotation_position="top right",
-                     annotation_font_size=11,
-                     annotation_font_color=RED)
-    fig_gl.update_xaxes(type="log", title_text="Frequenz [Hz]",
-                        gridcolor="#EEEEEE", tickfont=dict(size=13))
-    fig_gl.update_yaxes(title_text="Gruppenlaufzeit [ms]",
-                        gridcolor="#EEEEEE", tickfont=dict(size=13))
-    fig_gl.update_layout(height=420,
-        title=dict(
-            text=f"Gruppenlaufzeit | f₀={f0_1} Hz, Q={Q}, {modus}",
-            font=dict(size=15, color=BLUE), x=0.5, xanchor="center"),
-        **LAYOUT)
-    st.plotly_chart(fig_gl, width="stretch", key="chart_18")
-
-    # ── Kennzahlen ────────────────────────────────────────────────
-    st.markdown('<p class="section-title">Kennzahlen bei f₀</p>',
-                unsafe_allow_html=True)
-
-    cols3 = st.columns(3)
-    for i, name in enumerate(NAMES):
-        tau_v = tau_f0_vals[name]
-        schw  = tau_schwank[name]
-        ok1   = "✅" if tau_v <= 2.0 else "⚠️"
-        ok2   = "✅" if schw  <= 1.0 else "⚠️"
-        with cols3[i]:
-            st.markdown(f"""
-            <div class="metric-card"
-                 style="border-left-color:{COL[name]}">
-                <div class="metric-label">{name}</div>
-                <div class="metric-value">{ok1} τ(f₀) = {tau_v:.3f} ms</div>
-                <div class="metric-sub">
-                    Schwankung: {ok2} {schw:.3f} ms<br>
-                    Grenzwert: &lt; 2 ms
-                </div>
-            </div>""", unsafe_allow_html=True)
-
-    # ── Q-Einfluss auf Gruppenlaufzeit ────────────────────────────
-    st.markdown('<p class="section-title">Einfluss des Gütefaktors auf die Gruppenlaufzeit</p>',
-                unsafe_allow_html=True)
-
-    q_vec_gl = np.linspace(0.5, 15, 60)
-    fig_gl2  = go.Figure()
-
-    for name in NAMES:
-        tau_q = []
-        for q in q_vec_gl:
             tf_q    = make_filter(name, f0_1, q, GBW=GBW)
             w_arr   = 2 * np.pi * np.array([f0_1, f0_1 + 1.0])
             _, H_q  = signal.freqs(tf_q.num, tf_q.den, worN=w_arr)
@@ -1585,7 +1315,8 @@ with tabs[9]:
             tau_q.append(abs(-dphi / dw * 1000))
 
         fig_gl2.add_trace(go.Scatter(
-            x=q_vec_gl, y=tau_q, name=name,
+            x=q_vec_gl, y=tau_q,
+            name=name,
             line=dict(color=COL[name], width=2.5, dash=LS[name])))
 
     fig_gl2.add_vline(x=Q, line_dash="dot", line_color="orange",
@@ -1605,18 +1336,19 @@ with tabs[9]:
                          gridcolor="#EEEEEE", tickfont=dict(size=13))
     fig_gl2.update_layout(height=380,
         title=dict(
-            text=f"Gruppenlaufzeit bei f₀ vs. Gütefaktor | f₀={f0_1} Hz, {modus}",
-            font=dict(size=15, color=BLUE), x=0.5, xanchor="center"),
+            text=f"Gruppenlaufzeit bei f₀ vs. Gütefaktor Q | f₀={f0_1} Hz, {modus}",
+            font=dict(size=15, color=BLUE),
+            x=0.5, xanchor="center"),
         **LAYOUT)
-    st.plotly_chart(fig_gl2, width="stretch", key="chart_19")
+    st.plotly_chart(fig_gl2, width="stretch", key="chart_15")
 
-    tau_aktuell = tau_f0_vals["Sallen-Key"]
     st.markdown(f"""
     **Erkenntnisse:**
-    - Alle drei Filter haben beim idealen Modell **identische Gruppenlaufzeit** – wegen identischer Pole
+    - Alle drei Filter haben bei gleichem f₀ und Q **identische Gruppenlaufzeit** beim idealen Modell
     - Gruppenlaufzeit steigt mit dem Gütefaktor → Trade-off zwischen Selektivität und Laufzeit
-    - Bei Q={Q}: τ(f₀) = {tau_aktuell:.3f} ms
-    - Mit realem Operationsverstärker-Modell divergieren die Kurven sichtbar
+    - Bei Q={Q}: τ(f₀) = {tau_bei_f0["Sallen-Key"]:.3f} ms
+    - Simulationsgrenzwert 2 ms eingehalten (konservative Eigenannahme; strenger Wert für reale Systeme: 0,25 ms bei Δf=2 kHz)
+    - Gruppenlaufzeit ist kein Unterscheidungskriterium zwischen den Topologien – aber alle drei erfüllen die Systemanforderung
     """)
 
 # ── FOOTER ────────────────────────────────────────────────────────
