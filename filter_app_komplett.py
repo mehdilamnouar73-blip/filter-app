@@ -36,7 +36,7 @@ st.markdown(f"""
     header[data-testid="stHeader"] {{ display: none !important; }}
     #root > div:first-child {{ margin-top: 0 !important; }}
     .stApp > header {{ display: none !important; }}
-    [data-testid="collapsedControl"] {{ display: none !important; }}
+    [data-testid="collapsedControl"] {{ display: block !important; }}
     section[data-testid="stSidebar"] {{ 
         min-width: 300px !important; 
         max-width: 300px !important;
