@@ -33,22 +33,17 @@ st.markdown(f"""
     [data-testid="stAppViewContainer"] {{ background-color: #F5F7FA !important; }}
     [data-testid="stMainBlockContainer"] {{ background-color: #F5F7FA !important; }}
     .block-container {{ padding-top: 0rem; background-color: #F5F7FA !important; }}
-    /* Header optisch ausblenden (visibility statt display, damit der
-       collapsedControl-Pfeil als Kind-Element sichtbar bleiben kann) */
+    /* STRATEGIEWECHSEL: Der Header selbst und collapsedControl werden NICHT
+       mehr per CSS angefasst -> nativer Streamlit-Kollaps-Mechanismus bleibt
+       komplett unberuehrt und funktioniert garantiert wie vorgesehen.
+       Stattdessen werden nur einzelne Deko-Elemente IM Header gezielt
+       ausgeblendet (ueber eigene, stabile data-testid Selektoren). */
     header[data-testid="stHeader"] {{
-        visibility: hidden !important;
-        height: 2.5rem !important;
-        min-height: 2.5rem !important;
-        background: transparent !important;
-        overflow: visible !important;
+        background: #F5F7FA !important;
     }}
-    #root > div:first-child {{ margin-top: 0 !important; }}
-
-    [data-testid="collapsedControl"] {{
-        visibility: visible !important;
-        display: flex !important;
-        opacity: 1 !important;
-    }}
+    [data-testid="stToolbar"] {{ visibility: hidden !important; }}
+    [data-testid="stStatusWidget"] {{ visibility: hidden !important; }}
+    [data-testid="stDecoration"] {{ display: none !important; }}
 
     /* Nur die Breite im AUSGEKLAPPTEN Zustand festlegen.
        Fuer den eingeklappten Zustand KEINE eigenen Regeln -> Streamlit
