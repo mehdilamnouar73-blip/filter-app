@@ -33,15 +33,25 @@ st.markdown(f"""
     [data-testid="stAppViewContainer"] {{ background-color: #F5F7FA !important; }}
     [data-testid="stMainBlockContainer"] {{ background-color: #F5F7FA !important; }}
     .block-container {{ padding-top: 0rem; background-color: #F5F7FA !important; }}
-    /* Kein CSS mehr fuer Header/Toolbar/collapsedControl -> Streamlit-Standard
-       wird an dieser Stelle komplett unveraendert angezeigt. Das ist bewusst
-       so belassen, damit der native Ein-/Ausklapp-Button garantiert und
-       zuverlaessig funktioniert (keine versteckten Elternelemente mehr,
-       die ihn mitverstecken koennten). */
-    section[data-testid="stSidebar"][aria-expanded="true"] {{
+    header[data-testid="stHeader"] {{ display: none !important; }}
+    #root > div:first-child {{ margin-top: 0 !important; }}
+    .stApp > header {{ display: none !important; }}
+    section[data-testid="stSidebar"] {{
         min-width: 300px !important;
         max-width: 300px !important;
+        transform: none !important;
+        visibility: visible !important;
     }}
+    section[data-testid="stSidebar"][aria-expanded="false"] {{
+        min-width: 300px !important;
+        max-width: 300px !important;
+        margin-left: 0 !important;
+        transform: none !important;
+        visibility: visible !important;
+    }}
+    /* FINAL: Sidebar-Kollaps-Funktion bewusst deaktiviert. Sidebar ist
+       dauerhaft sichtbar/fixiert -> stabil, sauber, kein weiteres Risiko
+       vor der Abgabe. */
 
     div[data-testid="stSidebar"] {{ background-color: {BLUE}; }}
     div[data-testid="stSidebar"] * {{ color: white !important; font-size: 1.0rem !important; }}
