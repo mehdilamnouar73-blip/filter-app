@@ -37,17 +37,14 @@ st.markdown(f"""
     #root > div:first-child {{ margin-top: 0 !important; }}
     .stApp > header {{ display: none !important; }}
 
-    /* ── SIDEBAR: kollabierbar (FIX) ──────────────────────────── */
+    /* ── SIDEBAR: kollabierbar (FIX v2) ───────────────────────── */
     [data-testid="collapsedControl"] {{ display: block !important; }}
     section[data-testid="stSidebar"][aria-expanded="true"] {{
         min-width: 300px !important;
         max-width: 300px !important;
     }}
-    section[data-testid="stSidebar"][aria-expanded="false"] {{
-        min-width: 0px !important;
-        max-width: 0px !important;
-        margin-left: -300px !important;
-    }}
+    /* Kein Override für aria-expanded="false" -> Streamlit regelt
+       Kollaps + Repositionierung des Hauptbereichs selbst korrekt */
 
     div[data-testid="stSidebar"] {{ background-color: {BLUE}; }}
     div[data-testid="stSidebar"] * {{ color: white !important; font-size: 1.0rem !important; }}
